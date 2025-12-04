@@ -932,10 +932,10 @@ kbd {
         <h1>iMESSAGE<span class="accent">WRAPPED</span></h1>
         <p class="subtitle">Your texting habits, exposed. See who you text most, your response time, personality type, and more.</p>
         <div class="cta-group">
-            <a href="https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/imessage_wrapped.py" download class="cta-btn download-btn">
+            <button onclick="downloadScript()" class="cta-btn download-btn">
                 <span>⬇️</span>
                 <span>Download Script</span>
-            </a>
+            </button>
             <button onclick="shareLink()" class="cta-btn share-btn">
                 <span>📤</span>
                 <span>Send to Your Mac</span>
@@ -1096,7 +1096,7 @@ kbd {
                 <div class="step-num">3</div>
                 <div class="step-content">
                     <h3>Download the script</h3>
-                    <p>Paste in Terminal and hit Enter:</p>
+                    <p>Paste in Terminal and hit Enter, or <a href="#" onclick="downloadScript(true); return false;" style="color: var(--green); text-decoration: underline;">download here</a>:</p>
                     <div class="code-block">
                         <code id="curl-cmd">curl -O https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/imessage_wrapped.py</code>
                         <button class="copy-btn" onclick="copyCode('curl-cmd', this)">COPY</button>
@@ -1287,6 +1287,62 @@ async function copyCode(elementId, btn) {
     } catch (err) {
         btn.textContent = 'FAILED';
         setTimeout(() => btn.textContent = 'COPY', 2000);
+    }
+}
+
+// Download script functionality
+// skipScroll: true when called from within the install section
+async function downloadScript(skipScroll = false) {
+    const btn = document.querySelector('.download-btn');
+    const originalContent = btn ? btn.innerHTML : null;
+
+    try {
+        if (btn) {
+            btn.innerHTML = '<span>⏳</span><span>Downloading...</span>';
+            btn.disabled = true;
+        }
+
+        const response = await fetch('https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/imessage_wrapped.py');
+        if (!response.ok) throw new Error('Download failed');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'imessage_wrapped.py';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        if (btn) {
+            btn.innerHTML = '<span>✅</span><span>Downloaded!</span>';
+
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }, 3000);
+        }
+
+        // Scroll to instructions after a brief moment (unless already there)
+        if (!skipScroll) {
+            setTimeout(() => {
+                document.getElementById('install').scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+
+    } catch (err) {
+        console.error('Download error:', err);
+        if (btn) {
+            btn.innerHTML = '<span>❌</span><span>Failed - Try Again</span>';
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }, 2000);
+        } else {
+            alert('Download failed. Please try the curl command instead.');
+        }
     }
 }
 
