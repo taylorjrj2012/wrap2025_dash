@@ -4,8 +4,6 @@ Your texting habits, exposed. A Spotify Wrapped-style visualization of your iMes
 
 **[→ wrap2025.com](https://wrap2025.com)**
 
-<img src="preview.png" alt="iMessage Wrapped Preview" width="300">
-
 ## Features
 
 - 📊 **Total messages** - sent, received, per day
