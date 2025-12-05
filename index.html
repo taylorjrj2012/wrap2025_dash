@@ -724,7 +724,6 @@ kbd {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
-    flex-wrap: wrap;
 }
 
 .privacy-badge {
@@ -1132,6 +1131,43 @@ kbd {
     </div>
 </section>
 
+<section class="privacy-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label">// PRIVACY & SECURITY</div>
+            <div class="section-line"></div>
+        </div>
+        <div class="privacy-content">
+            <div class="privacy-text">
+                <p><strong>100% local. Zero network access.</strong></p>
+                <p>Your messages never leave your computer. No servers, no uploads, no tracking, no internet connection required.</p>
+                <p class="privacy-highlight"><strong>What it reads:</strong> Only metadata (timestamps, sender info, counts) + emojis. <em>It does NOT read your actual message text.</em></p>
+            </div>
+            <div class="privacy-badges">
+                <div class="privacy-badge">
+                    <span class="privacy-badge-icon">🔒</span>
+                    <span>Local Only</span>
+                </div>
+                <div class="privacy-badge">
+                    <span class="privacy-badge-icon">📵</span>
+                    <span>No Network</span>
+                </div>
+                <a href="https://github.com/kothari-nikunj/wrap2025" target="_blank" class="privacy-badge" style="text-decoration: none; color: inherit;">
+                    <span class="privacy-badge-icon">📖</span>
+                    <span>Open Source</span>
+                </a>
+            </div>
+            <div class="verify-section">
+                <p class="verify-text">Skeptical? Copy the full script and ask ChatGPT or Claude to verify it's safe:</p>
+                <button class="verify-btn" onclick="copyScriptForReview()">
+                    <span class="verify-btn-icon">📋</span>
+                    <span class="verify-btn-text">Copy Script for AI Review</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="features">
     <div class="container">
         <div class="section-header">
@@ -1251,43 +1287,6 @@ kbd {
         <div class="warning">
             <strong>⚠️</strong>
             <span>Not enough 2025 messages? Use the <code>--use-2024</code> flag.</span>
-        </div>
-    </div>
-</section>
-
-<section class="privacy-section">
-    <div class="container">
-        <div class="section-header">
-            <div class="section-label">// PRIVACY & SECURITY</div>
-            <div class="section-line"></div>
-        </div>
-        <div class="privacy-content">
-            <div class="privacy-text">
-                <p><strong>100% local. Zero network access.</strong></p>
-                <p>Your messages never leave your computer. No servers, no uploads, no tracking, no internet connection required.</p>
-                <p class="privacy-highlight"><strong>What it reads:</strong> Only metadata (timestamps, sender info, counts) + emojis. <em>It does NOT read your actual message text.</em></p>
-            </div>
-            <div class="privacy-badges">
-                <div class="privacy-badge">
-                    <span class="privacy-badge-icon">🔒</span>
-                    <span>Local Only</span>
-                </div>
-                <div class="privacy-badge">
-                    <span class="privacy-badge-icon">📵</span>
-                    <span>No Network</span>
-                </div>
-                <div class="privacy-badge">
-                    <span class="privacy-badge-icon">📖</span>
-                    <span>Open Source</span>
-                </div>
-            </div>
-            <div class="verify-section">
-                <p class="verify-text">Skeptical? Copy the full script and ask ChatGPT or Claude to verify it's safe:</p>
-                <button class="verify-btn" onclick="copyScriptForReview()">
-                    <span class="verify-btn-icon">📋</span>
-                    <span class="verify-btn-text">Copy Script for AI Review</span>
-                </button>
-            </div>
         </div>
     </div>
 </section>
