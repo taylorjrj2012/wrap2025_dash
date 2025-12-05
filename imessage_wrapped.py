@@ -250,19 +250,32 @@ def analyze(ts_start, ts_jun):
     else:
         d['busiest_day'] = None
     
-    # NEW: Conversation starter % (who texts first after 4+ hour gap)
+    # NEW: Conversation starter % (who texts first after 4+ hour gap) - 1:1 only
     r = q(f"""
-        WITH convos AS (
-            SELECT is_from_me, 
-                   (date/1000000000+978307200) as ts,
-                   LAG(date/1000000000+978307200) OVER (PARTITION BY handle_id ORDER BY date) as prev_ts
-            FROM message 
-            WHERE (date/1000000000+978307200)>{ts_start}
+        WITH chat_participants AS (
+            SELECT chat_id, COUNT(*) as participant_count
+            FROM chat_handle_join
+            GROUP BY chat_id
+        ),
+        one_on_one_messages AS (
+            SELECT m.ROWID as msg_id
+            FROM message m
+            JOIN chat_message_join cmj ON m.ROWID = cmj.message_id
+            JOIN chat_participants cp ON cmj.chat_id = cp.chat_id
+            WHERE cp.participant_count = 1
+        ),
+        convos AS (
+            SELECT m.is_from_me,
+                   (m.date/1000000000+978307200) as ts,
+                   LAG(m.date/1000000000+978307200) OVER (PARTITION BY m.handle_id ORDER BY m.date) as prev_ts
+            FROM message m
+            WHERE (m.date/1000000000+978307200)>{ts_start}
+            AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
         )
-        SELECT 
+        SELECT
             SUM(CASE WHEN is_from_me=1 THEN 1 ELSE 0 END) as you_started,
             COUNT(*) as total
-        FROM convos 
+        FROM convos
         WHERE prev_ts IS NULL OR (ts - prev_ts) > 14400
     """)
     if r and r[0][1] and r[0][1] > 0:
@@ -778,6 +791,7 @@ body {{ font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(
 .badge.green {{ border-color:var(--green); color:var(--green); background:rgba(74,222,128,0.1); }}
 .badge.yellow {{ border-color:var(--yellow); color:var(--yellow); background:rgba(251,191,36,0.1); }}
 .badge.red {{ border-color:var(--red); color:var(--red); background:rgba(248,113,113,0.1); }}
+.badge.cyan {{ border-color:var(--cyan); color:var(--cyan); background:rgba(34,211,238,0.1); }}
 
 .emoji-row {{ font-size:64px; letter-spacing:20px; margin:28px 0; }}
 
