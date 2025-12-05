@@ -16,6 +16,8 @@ Your texting habits, exposed. A Spotify Wrapped-style visualization of your iMes
 - 😍 **Down bad** - who you simp for
 - 📅 **Busiest day** - your most unhinged day
 - 💬 **Who texts first** - conversation initiator %
+- 👥 **Group chat stats** - your group chat activity overview
+- 🏆 **Top group chats** - your most active group conversations
 
 ## Installation
 

@@ -98,6 +98,7 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
 .slide .roast,
 .slide .badge,
 .slide .stat-grid,
+.slide .stat-item,
 .slide .rank-list,
 .slide .rank-item,
 .slide .emoji-row,
@@ -109,281 +110,534 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
 }
 
 /* Default animations */
-.slide.active .slide-label { animation: fadeSlideUp 0.4s ease-out forwards; }
-.slide.active .slide-text { animation: fadeSlideUp 0.4s ease-out 0.15s forwards; }
-.slide.active .slide-icon { animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards; }
-.slide.active h1 { animation: fadeSlideUp 0.5s ease-out 0.2s forwards; }
-.slide.active .subtitle { animation: fadeSlideUp 0.4s ease-out 0.35s forwards; }
-.slide.active .big-number { animation: fadeSlideUp 0.5s ease-out 0.25s forwards; }
-.slide.active .huge-name { animation: fadeSlideUp 0.5s ease-out 0.3s forwards; }
-.slide.active .personality-type { animation: glitchReveal 0.8s ease-out 0.25s forwards; }
-.slide.active .roast { animation: fadeSlideUp 0.4s ease-out 0.5s forwards; }
-.slide.active .badge { animation: fadeSlideUp 0.4s ease-out 0.6s forwards; }
-.slide.active .stat-grid { animation: fadeSlideUp 0.4s ease-out 0.4s forwards; }
+.slide.active .slide-label { animation: labelSlide 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.slide.active .slide-text { animation: textFade 0.4s ease-out 0.12s forwards; }
+.slide.active .slide-icon { animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s forwards; }
+.slide.active h1 { animation: titleReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards; }
+.slide.active .subtitle { animation: textFade 0.4s ease-out 0.3s forwards; }
+.slide.active .big-number { animation: numberPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards; }
+.slide.active .huge-name { animation: namePop 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards; }
+.slide.active .personality-type { animation: glitchReveal 0.9s ease-out 0.2s forwards; }
+.slide.active .roast { animation: roastFade 0.5s ease-out 0.45s forwards; }
+.slide.active .badge { animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s forwards; }
+.slide.active .stat-grid { animation: none; opacity: 1; transform: none; }
+.slide.active .stat-item { animation: statPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.slide.active .stat-item:nth-child(1) { animation-delay: 0.35s; }
+.slide.active .stat-item:nth-child(2) { animation-delay: 0.42s; }
+.slide.active .stat-item:nth-child(3) { animation-delay: 0.49s; }
 .slide.active .rank-list { animation: none; opacity: 1; transform: none; }
-.slide.active .rank-item { animation: slideInLeft 0.4s ease-out forwards; }
-.slide.active .rank-item:first-child { animation: topRankReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-.slide.active .emoji-row { animation: emojiWave 0.8s ease-out 0.3s forwards; }
+.slide.active .rank-item { animation: rankSlide 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.slide.active .rank-item:first-child { animation: topRankReveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.slide.active .emoji-row { animation: emojiReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards; }
 .slide.active .summary-card { animation: cardReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards; }
 
 /* Staggered rank items */
-.slide.active .rank-item:nth-child(1) { animation-delay: 0.15s; }
-.slide.active .rank-item:nth-child(2) { animation-delay: 0.25s; }
-.slide.active .rank-item:nth-child(3) { animation-delay: 0.35s; }
-.slide.active .rank-item:nth-child(4) { animation-delay: 0.45s; }
-.slide.active .rank-item:nth-child(5) { animation-delay: 0.55s; }
+.slide.active .rank-item:nth-child(1) { animation-delay: 0.12s; }
+.slide.active .rank-item:nth-child(2) { animation-delay: 0.22s; }
+.slide.active .rank-item:nth-child(3) { animation-delay: 0.32s; }
+.slide.active .rank-item:nth-child(4) { animation-delay: 0.42s; }
+.slide.active .rank-item:nth-child(5) { animation-delay: 0.52s; }
 
-/* INTRO SLIDE - Spin in */
-.slide.intro.active .slide-icon { animation: spinIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.slide.intro.active h1 { animation: typewriterReveal 0.6s steps(12) 0.3s forwards; }
+/* ===== SLIDE-SPECIFIC ANIMATIONS ===== */
 
-/* SLIDE 2: Total messages - Count up feel */
-.slide:nth-child(2).active .big-number { animation: countUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards; }
+/* INTRO SLIDE - Dramatic entrance */
+.slide.intro.active .slide-icon { animation: introIconSpin 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.slide.intro.active h1 { animation: introTitleGlitch 0.7s ease-out 0.35s forwards; }
+.slide.intro.active .subtitle { animation: subtitleFade 0.5s ease-out 0.6s forwards; }
 
-/* SLIDE 3: Words - Typewriter */
-.slide:nth-child(3).active .big-number { animation: typewriterReveal 0.5s steps(4) 0.2s forwards; }
+/* SLIDE 2: Total messages - Impact */
+.slide:nth-child(2).active .big-number { animation: impactNumber 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards; }
+.slide:nth-child(2).active .stat-item:nth-child(1) { animation-delay: 0.4s; }
+.slide:nth-child(2).active .stat-item:nth-child(2) { animation-delay: 0.5s; }
+.slide:nth-child(2).active .stat-item:nth-child(3) { animation-delay: 0.6s; }
 
-/* PINK SLIDE (#1 person) - Heart pulse */
-.slide.pink-bg.active .huge-name { animation: heartPulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards; }
-.slide.pink-bg.active .big-number { animation: scaleRotate 0.6s ease-out 0.4s forwards; }
+/* SLIDE 3: Words - Typewriter with cursor feel */
+.slide:nth-child(3).active .big-number { animation: typeNumber 0.6s steps(4) 0.15s forwards; }
+.slide:nth-child(3).active .roast { animation: roastTypeIn 0.5s ease-out 0.5s forwards; }
 
-/* PURPLE SLIDE (Personality) - Glitch effect */
-.slide.purple-bg.active .personality-type { animation: glitchReveal 1s ease-out 0.2s forwards; }
-.slide.purple-bg.active .roast { animation: flickerIn 0.6s ease-out 0.6s forwards; }
+/* PINK SLIDE (#1 person) - Heartbeat */
+.slide.pink-bg.active .slide-label { animation: labelGlow 0.5s ease-out forwards; }
+.slide.pink-bg.active .huge-name { animation: heartbeatName 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards; }
+.slide.pink-bg.active .big-number { animation: loveNumber 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards; }
 
-/* SLIDE 7: Conversation starter - Percentage fill */
-.slide:nth-child(7).active .big-number { animation: percentFill 0.8s ease-out 0.2s forwards; }
-.slide:nth-child(7).active .badge { animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards; }
+/* SLIDE 5: Inner Circle - Cascade */
+.slide:nth-child(5).active .rank-item { animation: cascadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.slide:nth-child(5).active .rank-item:first-child { animation: crownReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 
-/* SLIDE 8: Busiest day - Calendar flip */
-.slide:nth-child(8).active .big-number { animation: calendarFlip 0.6s ease-out 0.2s forwards; }
+/* SLIDE 6: Group Chats - Gather effect */
+.slide:nth-child(6).active .slide-icon { animation: groupGather 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards; }
+.slide:nth-child(6).active .big-number { animation: groupCount 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards; }
+.slide:nth-child(6).active .stat-item:nth-child(1) { animation-delay: 0.45s; }
+.slide:nth-child(6).active .stat-item:nth-child(2) { animation-delay: 0.52s; }
+.slide:nth-child(6).active .stat-item:nth-child(3) { animation-delay: 0.59s; }
+.slide:nth-child(6).active .badge { animation: contributorBadge 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s forwards; }
 
-/* SLIDE 9: 3AM bestie - Moon glow */
-.slide:nth-child(9).active .slide-icon { animation: moonGlow 1s ease-out 0.1s forwards; }
-.slide:nth-child(9).active .big-number { animation: fadeSlideUp 0.5s ease-out 0.4s forwards; }
+/* SLIDE 7: Top Groups - Trophy cascade (orange-bg handles fire effect) */
+.slide:nth-child(7).active .rank-item { animation: trophyCascade 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.slide:nth-child(7).active .rank-item:first-child { animation: goldReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.slide:nth-child(7).active .rank-item:nth-child(1) { animation-delay: 0.1s; }
+.slide:nth-child(7).active .rank-item:nth-child(2) { animation-delay: 0.2s; }
+.slide:nth-child(7).active .rank-item:nth-child(3) { animation-delay: 0.3s; }
+.slide:nth-child(7).active .rank-item:nth-child(4) { animation-delay: 0.4s; }
+.slide:nth-child(7).active .rank-item:nth-child(5) { animation-delay: 0.5s; }
 
-/* SLIDE 10: Peak hours - Clock tick */
-.slide:nth-child(10).active .big-number { animation: clockTick 0.6s ease-out 0.2s forwards; }
+/* PURPLE SLIDE (Personality) - Glitch chaos */
+.slide.purple-bg.active .slide-label { animation: labelGlitch 0.6s ease-out forwards; }
+.slide.purple-bg.active .personality-type { animation: personalityGlitch 1s ease-out 0.15s forwards; }
+.slide.purple-bg.active .roast { animation: flickerReveal 0.7s ease-out 0.55s forwards; }
 
-/* ORANGE SLIDE (Heating Up) - Fire rise */
-.slide.orange-bg.active .rank-item { animation: fireRise 0.5s ease-out forwards; }
-.slide.orange-bg.active .rank-item:first-child { animation: fireRiseTop 0.6s ease-out forwards; }
-.slide.orange-bg.active .rank-item:nth-child(1) { animation-delay: 0.1s; }
-.slide.orange-bg.active .rank-item:nth-child(2) { animation-delay: 0.2s; }
-.slide.orange-bg.active .rank-item:nth-child(3) { animation-delay: 0.3s; }
-.slide.orange-bg.active .rank-item:nth-child(4) { animation-delay: 0.4s; }
-.slide.orange-bg.active .rank-item:nth-child(5) { animation-delay: 0.5s; }
+/* SLIDE 9: Conversation starter - Fill effect */
+.slide:nth-child(9).active .big-number { animation: percentReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards; }
+.slide:nth-child(9).active .badge { animation: badgeSlam 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s forwards; }
 
-/* SLIDE 12: Biggest fan - Excited bounce */
-.slide:nth-child(12).active .big-number { animation: excitedBounce 0.7s ease-out 0.4s forwards; }
+/* SLIDE 10: Response time - Timer */
+.slide:nth-child(10).active .big-number { animation: timerReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards; }
+.slide:nth-child(10).active .badge { animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards; }
 
-/* RED SLIDE (Down Bad) - Dramatic drop */
-.slide.red-bg.active .huge-name { animation: dramaticDrop 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards; }
-.slide.red-bg.active .big-number { animation: pulseGrow 0.6s ease-out 0.5s forwards; }
+/* SLIDE 11: Peak hours - Clock */
+.slide:nth-child(11).active .big-number { animation: clockReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards; }
 
-/* SLIDE 14: Ghosted - Spooky fade */
-.slide:nth-child(14).active .rank-item { animation: ghostFade 0.5s ease-out forwards; }
-.slide:nth-child(14).active .rank-item:first-child { animation: ghostFadeTop 0.6s ease-out forwards; }
+/* SLIDE 12: 3AM bestie - Dreamy moon */
+.slide:nth-child(12).active .slide-icon { animation: moonFloat 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards; }
+.slide:nth-child(12).active .huge-name { animation: dreamyName 0.6s ease-out 0.35s forwards; }
+.slide:nth-child(12).active .big-number { animation: softNumber 0.5s ease-out 0.5s forwards; }
 
-/* SLIDE 15: Response time - Tick tock */
-.slide:nth-child(15).active .big-number { animation: tickTock 0.6s ease-out 0.2s forwards; }
-.slide:nth-child(15).active .badge { animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards; }
+/* SLIDE 13: Busiest day - Calendar flip */
+.slide:nth-child(13).active .big-number { animation: calendarFlip 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards; }
+.slide:nth-child(13).active .roast { animation: shakeReveal 0.5s ease-out 0.5s forwards; }
 
-/* Screenshot and share hint */
-.slide.active .screenshot-btn { opacity: 0; animation: fadeSlideUp 0.5s ease-out 0.6s forwards; }
-.slide.active .share-hint { opacity: 0; animation: fadeSlideUp 0.4s ease-out 0.8s forwards; }
+/* SLIDE 14: Biggest fan - Excited */
+.slide:nth-child(14).active .huge-name { animation: fanName 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards; }
+.slide:nth-child(14).active .big-number { animation: excitedNumber 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s forwards; }
 
-/* SLIDE TRANSITIONS - Vary the gallery movement */
-.gallery { transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+/* RED SLIDE (Down Bad) - Dramatic */
+.slide.red-bg.active .slide-label { animation: labelPulse 0.5s ease-out forwards; }
+.slide.red-bg.active .huge-name { animation: dramaticDrop 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards; }
+.slide.red-bg.active .big-number { animation: desperateNumber 0.6s ease-out 0.45s forwards; }
+
+/* ORANGE SLIDE (Heating Up) - Fire */
+.slide.orange-bg.active .slide-label { animation: fireLabel 0.5s ease-out forwards; }
+.slide.orange-bg.active .rank-item { animation: fireRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.slide.orange-bg.active .rank-item:first-child { animation: fireTop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.slide.orange-bg.active .rank-item:nth-child(1) { animation-delay: 0.08s; }
+.slide.orange-bg.active .rank-item:nth-child(2) { animation-delay: 0.18s; }
+.slide.orange-bg.active .rank-item:nth-child(3) { animation-delay: 0.28s; }
+.slide.orange-bg.active .rank-item:nth-child(4) { animation-delay: 0.38s; }
+.slide.orange-bg.active .rank-item:nth-child(5) { animation-delay: 0.48s; }
+
+/* SLIDE 17: Ghosted - Spooky */
+.slide:nth-child(17).active .rank-item { animation: ghostSlide 0.5s ease-out forwards; }
+.slide:nth-child(17).active .rank-item:first-child { animation: ghostTop 0.6s ease-out forwards; }
+.slide:nth-child(17).active .roast { animation: ghostText 0.4s ease-out 0.6s forwards; }
+
+/* SLIDE 18: Emojis - Wave each emoji */
+.slide:nth-child(18).active .emoji-row { animation: emojiContainer 0.6s ease-out 0.2s forwards; }
+
+/* SUMMARY SLIDE - Grand finale */
+.slide.summary-slide.active .summary-card { animation: summaryReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards; }
+
+/* Screenshot and share */
+.slide.active .screenshot-btn { opacity: 0; animation: buttonSlide 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards; }
+.slide.active .share-hint { opacity: 0; animation: hintFade 0.4s ease-out 0.8s forwards; }
+
+/* SLIDE TRANSITIONS */
+.gallery { transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
 
 /* ===== KEYFRAMES ===== */
-@keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+
+/* Base animations */
+@keyframes labelSlide {
+    0% { opacity: 0; transform: translateY(12px) translateX(-8px); }
+    100% { opacity: 1; transform: translateY(0) translateX(0); }
+}
+
+@keyframes textFade {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes titleReveal {
+    0% { opacity: 0; transform: translateY(25px) scale(0.95); }
+    70% { transform: translateY(-3px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes iconPop {
-    0% { opacity: 0; transform: translateY(20px) scale(0.5) rotate(-20deg); }
-    60% { transform: translateY(-5px) scale(1.1) rotate(5deg); }
+    0% { opacity: 0; transform: translateY(20px) scale(0.4) rotate(-15deg); }
+    50% { transform: translateY(-8px) scale(1.15) rotate(8deg); }
+    75% { transform: translateY(2px) scale(0.95) rotate(-3deg); }
     100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
 }
 
 @keyframes numberPop {
-    0% { opacity: 0; transform: translateY(30px) scale(0.8); }
-    60% { transform: translateY(-5px) scale(1.05); }
+    0% { opacity: 0; transform: translateY(30px) scale(0.7); }
+    60% { transform: translateY(-6px) scale(1.08); }
+    80% { transform: translateY(2px) scale(0.98); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes namePop {
-    0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+    0% { opacity: 0; transform: translateY(25px) scale(0.9); }
+    70% { transform: translateY(-4px) scale(1.03); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes glitchReveal {
-    0% { opacity: 0; transform: translateY(20px); filter: blur(8px); }
-    20% { opacity: 0.5; transform: translateY(10px) skewX(-8deg); filter: blur(4px); }
-    40% { opacity: 0.7; transform: translateY(5px) skewX(5deg); filter: blur(2px); }
-    60% { opacity: 0.9; transform: translateY(-2px) skewX(-2deg); filter: blur(0); }
-    80% { transform: translateY(1px) skewX(1deg); }
-    100% { opacity: 1; transform: translateY(0) skewX(0); filter: blur(0); }
-}
-
-@keyframes badgePop {
-    0% { opacity: 0; transform: translateY(15px) scale(0.8); }
-    60% { transform: translateY(-3px) scale(1.1); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes emojiPop {
-    0% { opacity: 0; transform: translateY(30px) scale(0.5); }
-    50% { transform: translateY(-5px) scale(1.1); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes cardReveal {
-    0% { opacity: 0; transform: translateY(40px) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Varied slide-specific animations */
-@keyframes spinIn {
-    0% { opacity: 0; transform: translateY(20px) scale(0.3) rotate(-180deg); }
-    60% { transform: translateY(-10px) scale(1.1) rotate(10deg); }
-    100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
-}
-
-@keyframes typewriterReveal {
-    0% { opacity: 0; clip-path: inset(0 100% 0 0); }
-    100% { opacity: 1; clip-path: inset(0 0 0 0); }
-}
-
-@keyframes heartPulse {
-    0% { opacity: 0; transform: translateY(30px) scale(0.8); }
-    50% { transform: translateY(-5px) scale(1.15); }
-    70% { transform: translateY(0) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes scaleRotate {
-    0% { opacity: 0; transform: translateY(20px) scale(0.5) rotate(-10deg); }
-    60% { transform: translateY(-5px) scale(1.1) rotate(3deg); }
-    100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
-}
-
-@keyframes flickerIn {
-    0% { opacity: 0; }
-    20% { opacity: 0.4; }
-    40% { opacity: 0.1; }
-    60% { opacity: 0.7; }
-    80% { opacity: 0.3; }
+@keyframes roastFade {
+    0% { opacity: 0; transform: translateY(12px); }
     100% { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fireRise {
-    0% { opacity: 0; transform: translateY(30px) scale(0.9); filter: brightness(1.5); }
-    50% { filter: brightness(1.3); }
-    100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
-}
-
-@keyframes dramaticDrop {
-    0% { opacity: 0; transform: translateY(-50px) scale(1.2); }
-    60% { transform: translateY(10px) scale(0.95); }
+@keyframes statPop {
+    0% { opacity: 0; transform: translateY(18px) scale(0.85); }
+    60% { transform: translateY(-4px) scale(1.05); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes pulseGrow {
-    0% { opacity: 0; transform: translateY(20px) scale(0.7); }
-    40% { transform: translateY(-5px) scale(1.15); }
-    70% { transform: translateY(2px) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Varied number animations */
-@keyframes countUp {
-    0% { opacity: 0; transform: translateY(40px) scale(0.8); }
-    50% { transform: translateY(-8px) scale(1.02); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes percentFill {
-    0% { opacity: 0; transform: scale(0.5); }
-    60% { transform: scale(1.1); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes calendarFlip {
-    0% { opacity: 0; transform: rotateX(-90deg) translateY(20px); }
-    60% { transform: rotateX(10deg); }
-    100% { opacity: 1; transform: rotateX(0) translateY(0); }
-}
-
-@keyframes clockTick {
-    0% { opacity: 0; transform: translateY(20px) rotate(-15deg); }
-    50% { transform: translateY(-5px) rotate(5deg); }
-    75% { transform: translateY(0) rotate(-2deg); }
-    100% { opacity: 1; transform: translateY(0) rotate(0); }
-}
-
-@keyframes moonGlow {
-    0% { opacity: 0; transform: translateY(20px) scale(0.5); filter: brightness(0.5); }
-    50% { filter: brightness(1.5); }
-    100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
-}
-
-@keyframes excitedBounce {
-    0% { opacity: 0; transform: translateY(30px) scale(0.8); }
-    30% { transform: translateY(-15px) scale(1.1); }
-    50% { transform: translateY(5px) scale(0.95); }
-    70% { transform: translateY(-5px) scale(1.02); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes tickTock {
-    0% { opacity: 0; transform: translateY(20px); }
-    25% { transform: translateY(-5px) rotate(3deg); }
-    50% { transform: translateY(0) rotate(-3deg); }
-    75% { transform: rotate(1deg); }
-    100% { opacity: 1; transform: translateY(0) rotate(0); }
-}
-
-/* Rank list animations */
-@keyframes slideInLeft {
-    0% { opacity: 0; transform: translateX(-30px); }
+@keyframes rankSlide {
+    0% { opacity: 0; transform: translateX(-25px); }
     100% { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes topRankReveal {
-    0% { opacity: 0; transform: translateX(-40px) scale(0.95); }
-    60% { transform: translateX(5px) scale(1.02); }
+    0% { opacity: 0; transform: translateX(-35px) scale(0.95); }
+    60% { transform: translateX(6px) scale(1.02); }
     100% { opacity: 1; transform: translateX(0) scale(1); }
 }
 
-@keyframes ghostFade {
-    0% { opacity: 0; transform: translateX(-20px); filter: blur(4px); }
-    100% { opacity: 0.85; transform: translateX(0); filter: blur(0); }
+@keyframes badgePop {
+    0% { opacity: 0; transform: translateY(15px) scale(0.6); }
+    50% { transform: translateY(-6px) scale(1.15); }
+    75% { transform: translateY(2px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes ghostFadeTop {
-    0% { opacity: 0; transform: translateX(-30px) scale(0.95); filter: blur(6px); }
-    100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+@keyframes emojiReveal {
+    0% { opacity: 0; transform: translateY(25px) scale(0.8); letter-spacing: 40px; }
+    60% { transform: translateY(-5px) scale(1.02); letter-spacing: 15px; }
+    100% { opacity: 1; transform: translateY(0) scale(1); letter-spacing: 20px; }
 }
 
-@keyframes fireRiseTop {
-    0% { opacity: 0; transform: translateY(30px) scale(0.95); filter: brightness(1.8); }
-    50% { filter: brightness(1.4); }
+@keyframes cardReveal {
+    0% { opacity: 0; transform: translateY(50px) scale(0.92); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Intro slide */
+@keyframes introIconSpin {
+    0% { opacity: 0; transform: translateY(30px) scale(0.2) rotate(-270deg); }
+    50% { transform: translateY(-15px) scale(1.2) rotate(15deg); }
+    75% { transform: translateY(5px) scale(0.9) rotate(-5deg); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes introTitleGlitch {
+    0% { opacity: 0; transform: translateY(20px); filter: blur(8px); }
+    30% { opacity: 0.7; transform: translateY(5px) skewX(-5deg); filter: blur(3px); }
+    50% { transform: translateY(-3px) skewX(3deg); filter: blur(1px); }
+    70% { transform: translateY(2px) skewX(-1deg); }
+    100% { opacity: 1; transform: translateY(0) skewX(0); filter: blur(0); }
+}
+
+@keyframes subtitleFade {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Impact number (slide 2) */
+@keyframes impactNumber {
+    0% { opacity: 0; transform: translateY(50px) scale(0.6); }
+    40% { transform: translateY(-12px) scale(1.1); }
+    60% { transform: translateY(5px) scale(0.95); }
+    80% { transform: translateY(-2px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Typewriter (slide 3) */
+@keyframes typeNumber {
+    0% { opacity: 0; clip-path: inset(0 100% 0 0); }
+    100% { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+@keyframes roastTypeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Pink slide - heartbeat */
+@keyframes labelGlow {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heartbeatName {
+    0% { opacity: 0; transform: translateY(30px) scale(0.7); }
+    35% { transform: translateY(-8px) scale(1.18); }
+    50% { transform: translateY(3px) scale(0.92); }
+    65% { transform: translateY(-4px) scale(1.08); }
+    80% { transform: translateY(1px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes loveNumber {
+    0% { opacity: 0; transform: translateY(20px) scale(0.8) rotate(-5deg); }
+    60% { transform: translateY(-5px) scale(1.08) rotate(2deg); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+/* Cascade (slide 5) */
+@keyframes cascadeIn {
+    0% { opacity: 0; transform: translateX(-30px) translateY(10px); }
+    100% { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+@keyframes crownReveal {
+    0% { opacity: 0; transform: translateX(-40px) scale(0.9); }
+    50% { transform: translateX(8px) scale(1.05); }
+    75% { transform: translateX(-3px) scale(0.98); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Purple slide - glitch */
+@keyframes labelGlitch {
+    0% { opacity: 0; transform: translateY(12px); }
+    30% { opacity: 0.5; transform: translateY(5px) skewX(-3deg); }
+    60% { opacity: 0.8; transform: translateY(-2px) skewX(2deg); }
+    100% { opacity: 1; transform: translateY(0) skewX(0); }
+}
+
+@keyframes personalityGlitch {
+    0% { opacity: 0; transform: translateY(25px); filter: blur(10px); }
+    15% { opacity: 0.4; transform: translateY(15px) skewX(-12deg); filter: blur(6px); }
+    30% { opacity: 0.6; transform: translateY(8px) skewX(8deg); filter: blur(4px); }
+    45% { opacity: 0.8; transform: translateY(3px) skewX(-5deg); filter: blur(2px); }
+    60% { transform: translateY(-2px) skewX(3deg); filter: blur(1px); }
+    75% { transform: translateY(1px) skewX(-1deg); }
+    90% { transform: skewX(0.5deg); }
+    100% { opacity: 1; transform: translateY(0) skewX(0); filter: blur(0); }
+}
+
+@keyframes flickerReveal {
+    0% { opacity: 0; transform: translateY(10px); }
+    15% { opacity: 0.3; }
+    30% { opacity: 0.1; }
+    45% { opacity: 0.6; }
+    60% { opacity: 0.2; }
+    75% { opacity: 0.8; }
+    90% { opacity: 0.5; }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glitchReveal {
+    0% { opacity: 0; transform: translateY(20px); filter: blur(6px); }
+    25% { opacity: 0.5; transform: translateY(10px) skewX(-6deg); filter: blur(3px); }
+    50% { opacity: 0.8; transform: translateY(3px) skewX(4deg); filter: blur(1px); }
+    75% { transform: translateY(-1px) skewX(-1deg); }
+    100% { opacity: 1; transform: translateY(0) skewX(0); filter: blur(0); }
+}
+
+/* Percent (slide 7) */
+@keyframes percentReveal {
+    0% { opacity: 0; transform: scale(0.4); }
+    50% { transform: scale(1.12); }
+    75% { transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes badgeSlam {
+    0% { opacity: 0; transform: translateY(-30px) scale(1.3); }
+    50% { transform: translateY(5px) scale(0.9); }
+    75% { transform: translateY(-3px) scale(1.05); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Calendar (slide 8) */
+@keyframes calendarFlip {
+    0% { opacity: 0; transform: perspective(400px) rotateX(-90deg) translateY(20px); }
+    50% { transform: perspective(400px) rotateX(15deg); }
+    75% { transform: perspective(400px) rotateX(-5deg); }
+    100% { opacity: 1; transform: perspective(400px) rotateX(0) translateY(0); }
+}
+
+@keyframes shakeReveal {
+    0% { opacity: 0; transform: translateY(10px); }
+    30% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    70% { transform: translateX(-2px); }
+    100% { opacity: 1; transform: translateY(0) translateX(0); }
+}
+
+/* Moon (slide 9) */
+@keyframes moonFloat {
+    0% { opacity: 0; transform: translateY(30px) scale(0.4); filter: brightness(0.3) blur(5px); }
+    40% { filter: brightness(1.6) blur(0); }
+    60% { transform: translateY(-12px) scale(1.1); filter: brightness(1.3); }
+    80% { transform: translateY(3px) scale(0.95); filter: brightness(1.1); }
     100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
 }
 
-@keyframes emojiWave {
-    0% { opacity: 0; transform: translateY(30px) scale(0.8); }
-    50% { transform: translateY(-10px) scale(1.05); }
+@keyframes dreamyName {
+    0% { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes softNumber {
+    0% { opacity: 0; transform: translateY(15px) scale(0.9); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes badgePop {
-    0% { opacity: 0; transform: translateY(15px) scale(0.7); }
-    60% { transform: translateY(-5px) scale(1.1); }
+/* Clock (slide 10) */
+@keyframes clockReveal {
+    0% { opacity: 0; transform: translateY(20px) rotate(-20deg); }
+    40% { transform: translateY(-5px) rotate(8deg); }
+    60% { transform: translateY(2px) rotate(-4deg); }
+    80% { transform: rotate(2deg); }
+    100% { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+/* Fire (orange slides) */
+@keyframes fireLabel {
+    0% { opacity: 0; transform: translateY(12px); filter: brightness(1.5); }
+    100% { opacity: 1; transform: translateY(0); filter: brightness(1); }
+}
+
+@keyframes fireRise {
+    0% { opacity: 0; transform: translateY(35px) scale(0.9); filter: brightness(1.6); }
+    40% { filter: brightness(1.4); }
+    70% { transform: translateY(-3px) scale(1.02); filter: brightness(1.2); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+@keyframes fireTop {
+    0% { opacity: 0; transform: translateY(40px) scale(0.9); filter: brightness(2); }
+    50% { filter: brightness(1.5); }
+    75% { transform: translateY(-5px) scale(1.03); filter: brightness(1.2); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+/* Fan (slide 12) */
+@keyframes fanName {
+    0% { opacity: 0; transform: translateY(25px) scale(0.85); }
+    50% { transform: translateY(-8px) scale(1.1); }
+    75% { transform: translateY(3px) scale(0.97); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes excitedNumber {
+    0% { opacity: 0; transform: translateY(35px) scale(0.7); }
+    25% { transform: translateY(-18px) scale(1.15); }
+    45% { transform: translateY(8px) scale(0.92); }
+    65% { transform: translateY(-6px) scale(1.05); }
+    85% { transform: translateY(2px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Red slide - dramatic */
+@keyframes labelPulse {
+    0% { opacity: 0; transform: translateY(12px); }
+    50% { opacity: 0.7; transform: translateY(3px) scale(1.05); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dramaticDrop {
+    0% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+    50% { transform: translateY(12px) scale(0.92); }
+    75% { transform: translateY(-5px) scale(1.03); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes desperateNumber {
+    0% { opacity: 0; transform: translateY(20px) scale(0.6); }
+    35% { transform: translateY(-8px) scale(1.2); }
+    55% { transform: translateY(4px) scale(0.9); }
+    75% { transform: translateY(-2px) scale(1.05); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Ghost (slide 14) */
+@keyframes ghostSlide {
+    0% { opacity: 0; transform: translateX(-25px); filter: blur(6px); }
+    100% { opacity: 0.85; transform: translateX(0); filter: blur(0); }
+}
+
+@keyframes ghostTop {
+    0% { opacity: 0; transform: translateX(-35px) scale(0.95); filter: blur(8px); }
+    100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+
+@keyframes ghostText {
+    0% { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Timer (slide 15) */
+@keyframes timerReveal {
+    0% { opacity: 0; transform: translateY(25px); }
+    30% { transform: translateY(-5px) rotate(5deg); }
+    50% { transform: translateY(2px) rotate(-3deg); }
+    70% { transform: rotate(1deg); }
+    100% { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+/* Emoji (slide 16) */
+@keyframes emojiContainer {
+    0% { opacity: 0; transform: translateY(30px) scale(0.7); }
+    50% { transform: translateY(-8px) scale(1.05); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Group chats (slide 17) */
+@keyframes groupGather {
+    0% { opacity: 0; transform: translateY(25px) scale(0.3); }
+    30% { transform: translateY(-5px) scale(1.25); }
+    50% { transform: translateY(5px) scale(0.9); }
+    70% { transform: translateY(-3px) scale(1.1); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes groupCount {
+    0% { opacity: 0; transform: translateY(30px) scale(0.6); }
+    50% { transform: translateY(-8px) scale(1.1); }
+    75% { transform: translateY(3px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes contributorBadge {
+    0% { opacity: 0; transform: translateY(20px) scale(0.5); }
+    50% { transform: translateY(-8px) scale(1.2); }
+    75% { transform: translateY(2px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Top groups (slide 18) */
+@keyframes trophyCascade {
+    0% { opacity: 0; transform: translateX(-30px) translateY(15px); }
+    60% { transform: translateX(5px) translateY(-3px); }
+    100% { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+@keyframes goldReveal {
+    0% { opacity: 0; transform: translateX(-40px) scale(0.9); filter: brightness(1.5); }
+    50% { transform: translateX(8px) scale(1.05); filter: brightness(1.3); }
+    75% { transform: translateX(-3px) scale(0.98); filter: brightness(1.1); }
+    100% { opacity: 1; transform: translateX(0) scale(1); filter: brightness(1); }
+}
+
+/* Summary (slide 19) */
+@keyframes summaryReveal {
+    0% { opacity: 0; transform: translateY(60px) scale(0.88); }
+    50% { transform: translateY(-8px) scale(1.02); }
+    75% { transform: translateY(3px) scale(0.99); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes buttonSlide {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hintFade {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .summary-card {
@@ -487,7 +741,34 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         </div>
     </div>
 
-    <!-- 6: Personality -->
+    <!-- 6: Group Chats Overview -->
+    <div class="slide">
+        <div class="slide-label">// GROUP CHATS</div>
+        <div class="slide-icon">👥</div>
+        <div class="big-number green">6</div>
+        <div class="slide-text">active group chats</div>
+        <div class="stat-grid">
+            <div class="stat-item"><span class="stat-num">3,847</span><span class="stat-lbl">total msgs</span></div>
+            <div class="stat-item"><span class="stat-num">2,156</span><span class="stat-lbl">sent</span></div>
+            <div class="stat-item"><span class="stat-num">56%</span><span class="stat-lbl">yours</span></div>
+        </div>
+        <div class="badge green">CONTRIBUTOR</div>
+    </div>
+
+    <!-- 7: Top Group Chats -->
+    <div class="slide orange-bg">
+        <div class="slide-label">// TOP GROUP CHATS</div>
+        <div class="slide-text">your most active groups</div>
+        <div class="rank-list">
+            <div class="rank-item"><span class="rank-num">1</span><span class="rank-name">The Squad</span><span class="rank-count">1,247</span></div>
+            <div class="rank-item"><span class="rank-num">2</span><span class="rank-name">Work Fam</span><span class="rank-count">892</span></div>
+            <div class="rank-item"><span class="rank-num">3</span><span class="rank-name">Book Club</span><span class="rank-count">634</span></div>
+            <div class="rank-item"><span class="rank-num">4</span><span class="rank-name">Family Chat</span><span class="rank-count">521</span></div>
+            <div class="rank-item"><span class="rank-num">5</span><span class="rank-name">Gym Bros</span><span class="rank-count">387</span></div>
+        </div>
+    </div>
+
+    <!-- 8: Personality -->
     <div class="slide purple-bg">
         <div class="slide-label">// DIAGNOSIS</div>
         <div class="slide-text">texting personality</div>
@@ -495,7 +776,7 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         <div class="roast">"terrorizes people at ungodly hours"</div>
     </div>
 
-    <!-- 7: Conversation Starter -->
+    <!-- 9: Conversation Starter -->
     <div class="slide">
         <div class="slide-label">// WHO TEXTS FIRST</div>
         <div class="slide-text">conversation initiator</div>
@@ -504,16 +785,24 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         <div class="badge green">YOU START</div>
     </div>
 
-    <!-- 8: Busiest Day -->
+    <!-- 10: Response -->
     <div class="slide">
-        <div class="slide-label">// BUSIEST DAY</div>
-        <div class="slide-text">your most unhinged day</div>
-        <div class="big-number orange">Mar 15</div>
-        <div class="slide-text"><span class="yellow">523</span> messages in one day</div>
-        <div class="roast">what happened??</div>
+        <div class="slide-label">// RESPONSE TIME</div>
+        <div class="slide-text">avg reply</div>
+        <div class="big-number yellow">23</div>
+        <div class="slide-text">minutes</div>
+        <div class="badge yellow">NORMAL</div>
     </div>
 
-    <!-- 9: 3AM -->
+    <!-- 11: Peak -->
+    <div class="slide">
+        <div class="slide-label">// PEAK HOURS</div>
+        <div class="slide-text">most active</div>
+        <div class="big-number green">10PM</div>
+        <div class="slide-text">on <span class="yellow">Thursdays</span></div>
+    </div>
+
+    <!-- 12: 3AM -->
     <div class="slide">
         <div class="slide-label">// 3AM BESTIE</div>
         <div class="slide-icon">🌙</div>
@@ -522,15 +811,32 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         <div class="slide-text">late night texts</div>
     </div>
 
-    <!-- 10: Peak -->
+    <!-- 13: Busiest Day -->
     <div class="slide">
-        <div class="slide-label">// PEAK HOURS</div>
-        <div class="slide-text">most active</div>
-        <div class="big-number green">10PM</div>
-        <div class="slide-text">on <span class="yellow">Thursdays</span></div>
+        <div class="slide-label">// BUSIEST DAY</div>
+        <div class="slide-text">your most unhinged day</div>
+        <div class="big-number orange">Mar 15</div>
+        <div class="slide-text"><span class="yellow">523</span> messages in one day</div>
+        <div class="roast">what happened??</div>
     </div>
 
-    <!-- 11: Heating Up -->
+    <!-- 14: Biggest Fan -->
+    <div class="slide">
+        <div class="slide-label">// BIGGEST FAN</div>
+        <div class="slide-text">texts you most</div>
+        <div class="huge-name orange">Taylor Swift</div>
+        <div class="slide-text"><span class="big-number yellow" style="font-size:56px">2.8x</span> more than you</div>
+    </div>
+
+    <!-- 15: Down Bad -->
+    <div class="slide red-bg">
+        <div class="slide-label">// DOWN BAD</div>
+        <div class="slide-text">you simp for</div>
+        <div class="huge-name">Morgan Davis</div>
+        <div class="slide-text">you text <span class="big-number yellow" style="font-size:56px">3.2x</span> more</div>
+    </div>
+
+    <!-- 16: Heating Up -->
     <div class="slide orange-bg">
         <div class="slide-label">// HEATING UP</div>
         <div class="slide-text">getting stronger in H2</div>
@@ -543,23 +849,7 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         </div>
     </div>
 
-    <!-- 12: Biggest Fan -->
-    <div class="slide">
-        <div class="slide-label">// BIGGEST FAN</div>
-        <div class="slide-text">texts you most</div>
-        <div class="huge-name orange">Taylor Swift</div>
-        <div class="slide-text"><span class="big-number yellow" style="font-size:56px">2.8x</span> more than you</div>
-    </div>
-
-    <!-- 13: Down Bad -->
-    <div class="slide red-bg">
-        <div class="slide-label">// DOWN BAD</div>
-        <div class="slide-text">you simp for</div>
-        <div class="huge-name">Morgan Davis</div>
-        <div class="slide-text">you text <span class="big-number yellow" style="font-size:56px">3.2x</span> more</div>
-    </div>
-
-    <!-- 14: Ghosted -->
+    <!-- 17: Ghosted -->
     <div class="slide">
         <div class="slide-label">// GHOSTED</div>
         <div class="slide-text">they chose peace</div>
@@ -573,23 +863,14 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         <div class="roast">before June → after</div>
     </div>
 
-    <!-- 15: Response -->
-    <div class="slide">
-        <div class="slide-label">// RESPONSE TIME</div>
-        <div class="slide-text">avg reply</div>
-        <div class="big-number yellow">23</div>
-        <div class="slide-text">minutes</div>
-        <div class="badge yellow">NORMAL</div>
-    </div>
-
-    <!-- 16: Emojis -->
+    <!-- 18: Emojis -->
     <div class="slide">
         <div class="slide-label">// EMOJIS</div>
         <div class="slide-text">your emotional range</div>
         <div class="emoji-row">😂  ❤️  🔥  💀  😭</div>
     </div>
 
-    <!-- 17: Summary -->
+    <!-- 19: Summary -->
     <div class="slide summary-slide">
         <div class="summary-card" id="summaryCard">
             <div class="summary-header">
@@ -656,7 +937,7 @@ const gallery = document.getElementById('gallery');
 const progressEl = document.getElementById('progress');
 const prevBtn = document.getElementById('prev');
 const nextBtn = document.getElementById('next');
-const total = 17;
+const total = 19;
 let current = 0;
 
 for (let i = 0; i < total; i++) {
