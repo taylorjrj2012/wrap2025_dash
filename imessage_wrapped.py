@@ -1263,9 +1263,13 @@ async function saveSlide(slideEl, filename, btn) {{
     // Hide the save button temporarily
     btn.style.opacity = '0';
 
+    // Get computed background color (html2canvas has issues with CSS variables)
+    const computedBg = getComputedStyle(slideEl).backgroundColor;
+    const bgColor = computedBg && computedBg !== 'rgba(0, 0, 0, 0)' ? computedBg : '#0a0a12';
+
     try {{
         const canvas = await html2canvas(slideEl, {{
-            backgroundColor: null,
+            backgroundColor: bgColor,
             scale: 2,
             logging: false,
             useCORS: true,
