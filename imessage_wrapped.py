@@ -530,8 +530,104 @@ def gen_html(d, contacts, path):
         <button class="slide-save-btn" onclick="saveSlide(this.parentElement, 'wrapped_word_count.png', this)">📸 Save</button>
         <div class="slide-watermark">wrap2025.com</div>
     </div>''')
-    
-    # Slide 4: Your #1 (only if we have contacts)
+
+    # Slide 4: Contribution Graph (GitHub-style activity heatmap) - Year overview
+    if d['daily_counts']:
+        from datetime import datetime as dt, timedelta
+        # Determine the year we're analyzing
+        year = now.year
+        year_start = dt(year, 1, 1)
+        year_end = dt(year, 12, 31)
+
+        # Build the calendar grid (53 weeks x 7 days)
+        # GitHub style: columns are weeks, rows are days (Sun=0 to Sat=6)
+        cal_cells = []
+
+        # Find the first Sunday on or before Jan 1
+        first_day = year_start
+        while first_day.weekday() != 6:  # 6 = Sunday in Python
+            first_day -= timedelta(days=1)
+
+        # Generate 53 weeks of data
+        current_date = first_day
+        max_count = d['max_daily'] if d['max_daily'] > 0 else 1
+
+        # Month labels - track when months start
+        month_labels = []
+        last_month = -1
+
+        week_idx = 0
+        while current_date <= year_end + timedelta(days=6):  # Go a bit past to fill last week
+            week_cells = []
+            for day_of_week in range(7):  # Sun to Sat
+                date_str = current_date.strftime('%Y-%m-%d')
+                count = d['daily_counts'].get(date_str, 0)
+
+                # Track month changes for labels
+                if current_date.month != last_month and year_start <= current_date <= year_end:
+                    month_labels.append((week_idx, current_date.strftime('%b')))
+                    last_month = current_date.month
+
+                # Determine intensity level (0-4 like GitHub)
+                if count == 0:
+                    level = 0
+                elif count <= max_count * 0.25:
+                    level = 1
+                elif count <= max_count * 0.5:
+                    level = 2
+                elif count <= max_count * 0.75:
+                    level = 3
+                else:
+                    level = 4
+
+                # Only show cells for the target year
+                in_year = year_start <= current_date <= year_end
+                week_cells.append((date_str, count, level, in_year))
+                current_date += timedelta(days=1)
+
+            cal_cells.append(week_cells)
+            week_idx += 1
+            if week_idx > 53:  # Safety limit
+                break
+
+        # Build the HTML grid
+        contrib_html = '<div class="contrib-graph">'
+        contrib_html += '<div class="contrib-months">'
+        for week_num, month_name in month_labels[:12]:  # Max 12 months
+            contrib_html += f'<span style="grid-column:{week_num + 1}">{month_name}</span>'
+        contrib_html += '</div>'
+        contrib_html += '<div class="contrib-days"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>'
+        contrib_html += '<div class="contrib-grid">'
+
+        for week in cal_cells:
+            contrib_html += '<div class="contrib-week">'
+            for date_str, count, level, in_year in week:
+                if in_year:
+                    contrib_html += f'<div class="contrib-cell level-{level}" title="{date_str}: {count} msgs"></div>'
+                else:
+                    contrib_html += '<div class="contrib-cell empty"></div>'
+            contrib_html += '</div>'
+
+        contrib_html += '</div>'
+        # Legend
+        contrib_html += '<div class="contrib-legend"><span>Less</span><div class="contrib-cell level-0"></div><div class="contrib-cell level-1"></div><div class="contrib-cell level-2"></div><div class="contrib-cell level-3"></div><div class="contrib-cell level-4"></div><span>More</span></div>'
+        contrib_html += '</div>'
+
+        slides.append(f'''
+        <div class="slide contrib-slide">
+            <div class="slide-label">// MESSAGE ACTIVITY</div>
+            <div class="slide-text">your texting throughout the year</div>
+            {contrib_html}
+            <div class="contrib-stats">
+                <div class="contrib-stat"><span class="contrib-stat-num">{d['active_days']}</span><span class="contrib-stat-lbl">active days</span></div>
+                <div class="contrib-stat"><span class="contrib-stat-num">{d['current_streak']}</span><span class="contrib-stat-lbl">current streak</span></div>
+                <div class="contrib-stat"><span class="contrib-stat-num">{d['longest_streak']}</span><span class="contrib-stat-lbl">longest streak</span></div>
+            </div>
+            <button class="slide-save-btn" onclick="saveSlide(this.parentElement, 'wrapped_contribution_graph.png', this)">📸 Save</button>
+            <div class="slide-watermark">wrap2025.com</div>
+        </div>''')
+
+    # Slide 5: Your #1 (only if we have contacts)
     if top:
         slides.append(f'''
         <div class="slide pink-bg">
@@ -685,114 +781,7 @@ def gen_html(d, contacts, path):
             <div class="slide-watermark">wrap2025.com</div>
         </div>''')
 
-    # Slide 14: Contribution Graph (GitHub-style activity heatmap)
-    if d['daily_counts']:
-        from datetime import datetime as dt, timedelta
-        # Determine the year we're analyzing
-        year = now.year
-        year_start = dt(year, 1, 1)
-        year_end = dt(year, 12, 31)
-
-        # Build the calendar grid (53 weeks x 7 days)
-        # GitHub style: columns are weeks, rows are days (Sun=0 to Sat=6)
-        cal_cells = []
-
-        # Find the first Sunday on or before Jan 1
-        first_day = year_start
-        while first_day.weekday() != 6:  # 6 = Sunday in Python
-            first_day -= timedelta(days=1)
-
-        # Generate 53 weeks of data
-        current_date = first_day
-        max_count = d['max_daily'] if d['max_daily'] > 0 else 1
-
-        # Month labels - track when months start
-        month_labels = []
-        last_month = -1
-
-        week_idx = 0
-        while current_date <= year_end + timedelta(days=6):  # Go a bit past to fill last week
-            week_cells = []
-            for day_of_week in range(7):  # Sun to Sat
-                date_str = current_date.strftime('%Y-%m-%d')
-                count = d['daily_counts'].get(date_str, 0)
-
-                # Track month changes for labels
-                if current_date.month != last_month and year_start <= current_date <= year_end:
-                    month_labels.append((week_idx, current_date.strftime('%b')))
-                    last_month = current_date.month
-
-                # Determine intensity level (0-4 like GitHub)
-                if count == 0:
-                    level = 0
-                elif count <= max_count * 0.25:
-                    level = 1
-                elif count <= max_count * 0.5:
-                    level = 2
-                elif count <= max_count * 0.75:
-                    level = 3
-                else:
-                    level = 4
-
-                # Only show cells for the target year
-                in_year = year_start <= current_date <= year_end
-                week_cells.append((date_str, count, level, in_year))
-                current_date += timedelta(days=1)
-
-            cal_cells.append(week_cells)
-            week_idx += 1
-            if week_idx > 53:  # Safety limit
-                break
-
-        # Build the HTML grid
-        contrib_html = '<div class="contrib-graph">'
-        contrib_html += '<div class="contrib-months">'
-        for week_num, month_name in month_labels[:12]:  # Max 12 months
-            contrib_html += f'<span style="grid-column:{week_num + 1}">{month_name}</span>'
-        contrib_html += '</div>'
-        contrib_html += '<div class="contrib-days"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>'
-        contrib_html += '<div class="contrib-grid">'
-
-        for week in cal_cells:
-            contrib_html += '<div class="contrib-week">'
-            for date_str, count, level, in_year in week:
-                if in_year:
-                    contrib_html += f'<div class="contrib-cell level-{level}" title="{date_str}: {count} msgs"></div>'
-                else:
-                    contrib_html += '<div class="contrib-cell empty"></div>'
-            contrib_html += '</div>'
-
-        contrib_html += '</div>'
-        # Legend
-        contrib_html += '<div class="contrib-legend"><span>Less</span><div class="contrib-cell level-0"></div><div class="contrib-cell level-1"></div><div class="contrib-cell level-2"></div><div class="contrib-cell level-3"></div><div class="contrib-cell level-4"></div><span>More</span></div>'
-        contrib_html += '</div>'
-
-        # High activity days list
-        top_days_html = ''
-        if d['top_days']:
-            for date_str, count in d['top_days'][:5]:
-                try:
-                    day_dt = dt.strptime(date_str, '%Y-%m-%d')
-                    day_formatted = day_dt.strftime('%b %d')
-                    top_days_html += f'<div class="top-day-item"><span class="top-day-date">{day_formatted}</span><span class="top-day-count">{count:,}</span></div>'
-                except:
-                    pass
-
-        slides.append(f'''
-        <div class="slide contrib-slide">
-            <div class="slide-label">// MESSAGE ACTIVITY</div>
-            <div class="slide-text">your texting throughout the year</div>
-            {contrib_html}
-            <div class="contrib-stats">
-                <div class="contrib-stat"><span class="contrib-stat-num">{d['active_days']}</span><span class="contrib-stat-lbl">active days</span></div>
-                <div class="contrib-stat"><span class="contrib-stat-num">{d['current_streak']}</span><span class="contrib-stat-lbl">current streak</span></div>
-                <div class="contrib-stat"><span class="contrib-stat-num">{d['longest_streak']}</span><span class="contrib-stat-lbl">longest streak</span></div>
-            </div>
-            <button class="slide-save-btn" onclick="saveSlide(this.parentElement, 'wrapped_contribution_graph.png', this)">📸 Save</button>
-            <div class="slide-watermark">wrap2025.com</div>
-        </div>''')
-
-    # Slide 15: Biggest fan
+    # Slide 14: Biggest fan
     if d['fan']:
         f = d['fan'][0]
         ratio = round(f[1]/(f[2]+1), 1)
