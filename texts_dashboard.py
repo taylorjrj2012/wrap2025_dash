@@ -124,7 +124,7 @@ def q_whatsapp(sql):
     return r
 
 def get_all_imessage_data(ts_start, contacts):
-    data = {'contacts': [], 'daily_counts': {}, 'hourly_counts': defaultdict(int), 'day_of_week_counts': defaultdict(int), 'group_chats': []}
+    data = {'contacts': [], 'daily_counts': {}, 'hourly_counts': defaultdict(int), 'day_of_week_counts': defaultdict(int), 'group_chats': [], 'messages': []}
     
     cte = """WITH chat_participants AS (SELECT chat_id, COUNT(*) as pc FROM chat_handle_join GROUP BY chat_id),
         one_on_one AS (SELECT m.ROWID as msg_id FROM message m JOIN chat_message_join cmj ON m.ROWID = cmj.message_id
@@ -139,9 +139,24 @@ def get_all_imessage_data(ts_start, contacts):
         AND NOT (LENGTH(REPLACE(REPLACE(h.id, '+', ''), '-', '')) BETWEEN 5 AND 6 AND REPLACE(REPLACE(h.id, '+', ''), '-', '') GLOB '[0-9]*')
         GROUP BY h.id ORDER BY total DESC""")
     
+    handle_to_idx = {}
     for handle, total, sent, received, late in rows:
         name = get_name_imessage(handle, contacts)
+        handle_to_idx[handle] = len(data['contacts'])
         data['contacts'].append({'id': handle, 'name': name, 'total': total, 'sent': sent, 'received': received, 'late_night': late, 'ratio': round(sent/max(received,1), 2), 'platform': 'imessage'})
+    
+    # Get all individual messages with timestamps
+    rows = q_imessage(f"""{cte}
+        SELECT h.id, (m.date/1000000000+978307200) as ts, m.is_from_me
+        FROM message m JOIN handle h ON m.handle_id=h.ROWID
+        WHERE (m.date/1000000000+978307200)>{ts_start} AND m.ROWID IN (SELECT msg_id FROM one_on_one)
+        AND NOT (LENGTH(REPLACE(REPLACE(h.id, '+', ''), '-', '')) BETWEEN 5 AND 6 AND REPLACE(REPLACE(h.id, '+', ''), '-', '') GLOB '[0-9]*')
+        ORDER BY ts""")
+    
+    for handle, ts, is_from_me in rows:
+        if handle in handle_to_idx:
+            # Store as [timestamp, contact_index, is_sent] to save space
+            data['messages'].append([int(ts), handle_to_idx[handle], is_from_me])
     
     for date, total, sent, received in q_imessage(f"SELECT DATE(datetime((date/1000000000+978307200),'unixepoch','localtime')) d, COUNT(*), SUM(CASE WHEN is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN is_from_me=0 THEN 1 ELSE 0 END) FROM message WHERE (date/1000000000+978307200)>{ts_start} GROUP BY d"):
         data['daily_counts'][date] = {'total': total, 'sent': sent, 'received': received}
@@ -163,7 +178,7 @@ def get_all_imessage_data(ts_start, contacts):
     return data
 
 def get_all_whatsapp_data(ts_start, contacts):
-    data = {'contacts': [], 'daily_counts': {}, 'hourly_counts': defaultdict(int), 'day_of_week_counts': defaultdict(int), 'group_chats': []}
+    data = {'contacts': [], 'daily_counts': {}, 'hourly_counts': defaultdict(int), 'day_of_week_counts': defaultdict(int), 'group_chats': [], 'messages': []}
     
     cte = f"""WITH dm AS (SELECT Z_PK, ZCONTACTJID FROM ZWACHATSESSION WHERE ZSESSIONTYPE = 0),
         dm_msg AS (SELECT m.Z_PK as msg_id, s.ZCONTACTJID FROM ZWAMESSAGE m JOIN dm s ON m.ZCHATSESSION = s.Z_PK)"""
@@ -174,9 +189,22 @@ def get_all_whatsapp_data(ts_start, contacts):
             SUM(CASE WHEN CAST(strftime('%H',datetime(m.ZMESSAGEDATE+{COCOA_OFFSET},'unixepoch','localtime')) AS INT)<5 THEN 1 ELSE 0 END)
         FROM ZWAMESSAGE m JOIN dm_msg ON m.Z_PK = dm_msg.msg_id WHERE m.ZMESSAGEDATE>{ts_start} GROUP BY 1 ORDER BY 2 DESC""")
     
+    jid_to_idx = {}
     for jid, total, sent, received, late in rows:
         name = get_name_whatsapp(jid, contacts)
+        jid_to_idx[jid] = len(data['contacts'])
         data['contacts'].append({'id': jid, 'name': name, 'total': total, 'sent': sent, 'received': received, 'late_night': late, 'ratio': round(sent/max(received,1), 2), 'platform': 'whatsapp'})
+    
+    # Get all individual messages with timestamps
+    rows = q_whatsapp(f"""{cte}
+        SELECT dm_msg.ZCONTACTJID, (m.ZMESSAGEDATE+{COCOA_OFFSET}) as ts, m.ZISFROMME
+        FROM ZWAMESSAGE m JOIN dm_msg ON m.Z_PK = dm_msg.msg_id
+        WHERE m.ZMESSAGEDATE>{ts_start}
+        ORDER BY ts""")
+    
+    for jid, ts, is_from_me in rows:
+        if jid in jid_to_idx:
+            data['messages'].append([int(ts), jid_to_idx[jid], is_from_me])
     
     for date, total, sent, received in q_whatsapp(f"SELECT DATE(datetime(ZMESSAGEDATE+{COCOA_OFFSET},'unixepoch','localtime')), COUNT(*), SUM(CASE WHEN ZISFROMME=1 THEN 1 ELSE 0 END), SUM(CASE WHEN ZISFROMME=0 THEN 1 ELSE 0 END) FROM ZWAMESSAGE WHERE ZMESSAGEDATE>{ts_start} GROUP BY 1"):
         data['daily_counts'][date] = {'total': total, 'sent': sent, 'received': received}
@@ -197,11 +225,40 @@ def get_all_whatsapp_data(ts_start, contacts):
     return data
 
 def merge_data(im_data, wa_data, has_im, has_wa):
-    merged = {'contacts': [], 'daily_counts': {}, 'hourly_counts': {str(i): 0 for i in range(24)}, 'day_of_week_counts': {}, 'group_chats': [], 'summary': {}}
+    merged = {'contacts': [], 'daily_counts': {}, 'hourly_counts': {str(i): 0 for i in range(24)}, 'day_of_week_counts': {}, 'group_chats': [], 'messages': [], 'summary': {}}
+    
+    # Track index offset for WhatsApp contacts
+    im_contact_count = len(im_data['contacts']) if has_im else 0
     
     if has_im: merged['contacts'].extend(im_data['contacts'])
     if has_wa: merged['contacts'].extend(wa_data['contacts'])
+    
+    # Build index mapping before sorting
+    id_to_new_idx = {c['id']: i for i, c in enumerate(merged['contacts'])}
+    
+    # Sort contacts by total
     merged['contacts'].sort(key=lambda x: -x['total'])
+    
+    # Rebuild mapping after sort
+    id_to_new_idx = {c['id']: i for i, c in enumerate(merged['contacts'])}
+    
+    # Merge messages with updated contact indices
+    if has_im:
+        for ts, old_idx, is_sent in im_data['messages']:
+            contact_id = im_data['contacts'][old_idx]['id']
+            new_idx = id_to_new_idx.get(contact_id, -1)
+            if new_idx >= 0:
+                merged['messages'].append([ts, new_idx, is_sent])
+    
+    if has_wa:
+        for ts, old_idx, is_sent in wa_data['messages']:
+            contact_id = wa_data['contacts'][old_idx]['id']
+            new_idx = id_to_new_idx.get(contact_id, -1)
+            if new_idx >= 0:
+                merged['messages'].append([ts, new_idx, is_sent])
+    
+    # Sort messages by timestamp
+    merged['messages'].sort(key=lambda x: x[0])
     
     all_dates = set()
     if has_im: all_dates.update(im_data['daily_counts'].keys())
@@ -327,6 +384,13 @@ h1{{font-size:24px;font-weight:600}}
 <script>
 const D={json_data};
 let sel=new Set(),plat='all',srt='total',searchTerm='';
+let actChart,hrChart,dayChart;
+
+// Build contact index lookup: id -> index
+var idToIdx={{}};
+for(var i=0;i<D.contacts.length;i++){{
+    idToIdx[D.contacts[i].id]=i;
+}}
 
 function init(){{
     document.getElementById('badges').innerHTML=(D.summary.has_imessage?'<div class="badge im">📱 '+D.summary.imessage_total.toLocaleString()+'</div>':'')+(D.summary.has_whatsapp?'<div class="badge wa">💬 '+D.summary.whatsapp_total.toLocaleString()+'</div>':'');
@@ -334,7 +398,7 @@ function init(){{
     document.getElementById('plat').innerHTML='<button class="btn on" data-p="all">All</button>'+(D.summary.has_imessage?'<button class="btn" data-p="imessage">📱</button>':'')+(D.summary.has_whatsapp?'<button class="btn" data-p="whatsapp">💬</button>':'');
     document.getElementById('sort').innerHTML='<button class="btn on" data-s="total">Total</button><button class="btn" data-s="sent">Sent</button><button class="btn" data-s="received">Recv</button>';
     render();
-    charts();
+    initCharts();
     groups();
     
     document.getElementById('search').addEventListener('input',function(e){{
@@ -367,6 +431,7 @@ function init(){{
             if(sel.has(id)){{sel.delete(id)}}else{{sel.add(id)}}
             render();
             renderStats();
+            updateCharts();
         }}
     }});
     
@@ -374,7 +439,52 @@ function init(){{
         sel.clear();
         render();
         renderStats();
+        updateCharts();
     }});
+}}
+
+function getFilteredData(){{
+    // If no selection, return original aggregates
+    if(sel.size===0){{
+        return {{
+            daily: D.daily_counts,
+            hourly: D.hourly_counts,
+            dayOfWeek: D.day_of_week_counts
+        }};
+    }}
+    
+    // Build set of selected contact indices
+    var selIdx=new Set();
+    sel.forEach(function(id){{
+        if(idToIdx[id]!==undefined) selIdx.add(idToIdx[id]);
+    }});
+    
+    // Aggregate from raw messages
+    var daily={{}};
+    var hourly={{}};
+    var dayOfWeek={{}};
+    
+    for(var i=0;i<D.messages.length;i++){{
+        var msg=D.messages[i];
+        var ts=msg[0],cidx=msg[1];
+        if(!selIdx.has(cidx)) continue;
+        
+        var dt=new Date(ts*1000);
+        var dateStr=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+        var hour=dt.getHours();
+        var dayNum=dt.getDay();
+        
+        if(!daily[dateStr]) daily[dateStr]={{total:0}};
+        daily[dateStr].total++;
+        
+        var hKey=String(hour);
+        hourly[hKey]=(hourly[hKey]||0)+1;
+        
+        var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        dayOfWeek[days[dayNum]]=(dayOfWeek[days[dayNum]]||0)+1;
+    }}
+    
+    return {{daily:daily,hourly:hourly,dayOfWeek:dayOfWeek}};
 }}
 
 function renderStats(){{
@@ -443,36 +553,60 @@ function render(){{
     }}
 }}
 
-function charts(){{
+function initCharts(){{
     var dates=Object.keys(D.daily_counts).sort();
     var vals=dates.map(function(d){{return D.daily_counts[d].total}});
     var labels=dates.map(function(d){{return new Date(d).toLocaleDateString('en-US',{{month:'short',day:'numeric'}})}});
     
-    new Chart(document.getElementById('actChart'),{{
+    actChart=new Chart(document.getElementById('actChart'),{{
         type:'line',
         data:{{labels:labels,datasets:[{{data:vals,borderColor:'#32d74b',backgroundColor:'rgba(50,215,75,.1)',fill:true,tension:.4,pointRadius:0}}]}},
-        options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
+        options:{{responsive:true,maintainAspectRatio:false,animation:{{duration:300}},plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
     }});
     
     var hrs=[];for(var i=0;i<24;i++)hrs.push(i);
     var hrVals=hrs.map(function(h){{return D.hourly_counts[String(h)]||0}});
     var hrLbls=hrs.map(function(h){{return h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p'}});
     
-    new Chart(document.getElementById('hrChart'),{{
+    hrChart=new Chart(document.getElementById('hrChart'),{{
         type:'bar',
         data:{{labels:hrLbls,datasets:[{{data:hrVals,backgroundColor:'#0a84ff',borderRadius:3}}]}},
-        options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
+        options:{{responsive:true,maintainAspectRatio:false,animation:{{duration:300}},plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
     }});
     
     var dys=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     var dyFull=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     var dyVals=dyFull.map(function(d){{return D.day_of_week_counts[d]||0}});
     
-    new Chart(document.getElementById('dayChart'),{{
+    dayChart=new Chart(document.getElementById('dayChart'),{{
         type:'bar',
         data:{{labels:dys,datasets:[{{data:dyVals,backgroundColor:'#bf5af2',borderRadius:3}}]}},
-        options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366'}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
+        options:{{responsive:true,maintainAspectRatio:false,animation:{{duration:300}},plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366'}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
     }});
+}}
+
+function updateCharts(){{
+    var filtered=getFilteredData();
+    
+    // Update activity chart
+    var dates=Object.keys(D.daily_counts).sort();
+    var vals=dates.map(function(d){{
+        return filtered.daily[d]?filtered.daily[d].total:0;
+    }});
+    actChart.data.datasets[0].data=vals;
+    actChart.update();
+    
+    // Update hourly chart
+    var hrs=[];for(var i=0;i<24;i++)hrs.push(i);
+    var hrVals=hrs.map(function(h){{return filtered.hourly[String(h)]||0}});
+    hrChart.data.datasets[0].data=hrVals;
+    hrChart.update();
+    
+    // Update day of week chart
+    var dyFull=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var dyVals=dyFull.map(function(d){{return filtered.dayOfWeek[d]||0}});
+    dayChart.data.datasets[0].data=dyVals;
+    dayChart.update();
 }}
 
 function groups(){{
@@ -514,24 +648,24 @@ def main():
     has_im, has_wa = check_access()
     print(f"✓ Found: {', '.join(filter(None, ['iMessage' if has_im else '', 'WhatsApp' if has_wa else '']))}")
     
-    im_data = wa_data = {'contacts': [], 'daily_counts': {}, 'hourly_counts': {}, 'day_of_week_counts': {}, 'group_chats': []}
+    im_data = wa_data = {'contacts': [], 'daily_counts': {}, 'hourly_counts': {}, 'day_of_week_counts': {}, 'group_chats': [], 'messages': []}
     
     if has_im:
-        print("Analyzing iMessage...")
+        print("Analyzing iMessage (this may take a moment)...")
         im_contacts = extract_imessage_contacts()
         im_data = get_all_imessage_data(ts_im, im_contacts)
-        print(f"✓ {len(im_data['contacts'])} conversations")
+        print(f"✓ {len(im_data['contacts'])} conversations, {len(im_data['messages']):,} messages")
     
     if has_wa:
         print("Analyzing WhatsApp...")
         wa_contacts = extract_whatsapp_contacts()
         wa_data = get_all_whatsapp_data(ts_wa, wa_contacts)
-        print(f"✓ {len(wa_data['contacts'])} conversations")
+        print(f"✓ {len(wa_data['contacts'])} conversations, {len(wa_data['messages']):,} messages")
     
     print("Generating dashboard...")
     data = merge_data(im_data, wa_data, has_im, has_wa)
     output = generate_html(data, year, args.output)
-    print(f"✓ {data['summary']['total_messages']:,} total messages")
+    print(f"✓ {data['summary']['total_messages']:,} total messages ({len(data['messages']):,} with timestamps)")
     print(f"✓ Saved to {output}")
     
     subprocess.run(['open', output])
