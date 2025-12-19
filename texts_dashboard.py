@@ -326,51 +326,171 @@ h1{{font-size:24px;font-weight:600}}
 </div>
 <script>
 const D={json_data};
-let sel=new Set(),plat='all',srt='total',q='';
+let sel=new Set(),plat='all',srt='total',searchTerm='';
 
 function init(){{
-document.getElementById('badges').innerHTML=(D.summary.has_imessage?'<div class="badge im">📱 '+D.summary.imessage_total.toLocaleString()+'</div>':'')+(D.summary.has_whatsapp?'<div class="badge wa">💬 '+D.summary.whatsapp_total.toLocaleString()+'</div>':'');
-const s=D.summary,pd=Math.round(s.total_messages/365);
-document.getElementById('stats').innerHTML='<div class="stat"><div class="stat-label">Total</div><div class="stat-val gr">'+s.total_messages.toLocaleString()+'</div><div class="stat-sub">'+pd+'/day</div></div><div class="stat"><div class="stat-label">Sent</div><div class="stat-val" style="color:#0a84ff">'+s.total_sent.toLocaleString()+'</div></div><div class="stat"><div class="stat-label">Received</div><div class="stat-val" style="color:#64d2ff">'+s.total_received.toLocaleString()+'</div></div><div class="stat"><div class="stat-label">Contacts</div><div class="stat-val" style="color:#bf5af2">'+s.total_contacts+'</div><div class="stat-sub">+'+s.total_groups+' groups</div></div>';
-document.getElementById('plat').innerHTML='<button class="btn on" data-p="all">All</button>'+(D.summary.has_imessage?'<button class="btn" data-p="imessage">📱</button>':'')+(D.summary.has_whatsapp?'<button class="btn" data-p="whatsapp">💬</button>':'');
-document.getElementById('sort').innerHTML='<button class="btn on" data-s="total">Total</button><button class="btn" data-s="sent">Sent</button><button class="btn" data-s="received">Recv</button>';
-render();charts();groups();
-document.getElementById('search').oninput=e=>{{q=e.target.value;render()}};
-document.getElementById('plat').onclick=e=>{{if(e.target.dataset.p){{plat=e.target.dataset.p;[...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b.dataset.p===plat));render()}}}};
-document.getElementById('sort').onclick=e=>{{if(e.target.dataset.s){{srt=e.target.dataset.s;[...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b.dataset.s===srt));render()}}}};
-document.getElementById('cList').onclick=e=>{{const r=e.target.closest('.contact');if(r){{const id=r.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);render()}}}};
-document.getElementById('clearBtn').onclick=()=>{{sel.clear();render()}};
+    document.getElementById('badges').innerHTML=(D.summary.has_imessage?'<div class="badge im">📱 '+D.summary.imessage_total.toLocaleString()+'</div>':'')+(D.summary.has_whatsapp?'<div class="badge wa">💬 '+D.summary.whatsapp_total.toLocaleString()+'</div>':'');
+    renderStats();
+    document.getElementById('plat').innerHTML='<button class="btn on" data-p="all">All</button>'+(D.summary.has_imessage?'<button class="btn" data-p="imessage">📱</button>':'')+(D.summary.has_whatsapp?'<button class="btn" data-p="whatsapp">💬</button>':'');
+    document.getElementById('sort').innerHTML='<button class="btn on" data-s="total">Total</button><button class="btn" data-s="sent">Sent</button><button class="btn" data-s="received">Recv</button>';
+    render();
+    charts();
+    groups();
+    
+    document.getElementById('search').addEventListener('input',function(e){{
+        searchTerm=e.target.value.toLowerCase();
+        render();
+    }});
+    
+    document.getElementById('plat').addEventListener('click',function(e){{
+        if(e.target.dataset.p){{
+            plat=e.target.dataset.p;
+            this.querySelectorAll('.btn').forEach(function(b){{b.classList.remove('on')}});
+            e.target.classList.add('on');
+            render();
+        }}
+    }});
+    
+    document.getElementById('sort').addEventListener('click',function(e){{
+        if(e.target.dataset.s){{
+            srt=e.target.dataset.s;
+            this.querySelectorAll('.btn').forEach(function(b){{b.classList.remove('on')}});
+            e.target.classList.add('on');
+            render();
+        }}
+    }});
+    
+    document.getElementById('cList').addEventListener('click',function(e){{
+        var row=e.target.closest('.contact');
+        if(row){{
+            var id=row.dataset.id;
+            if(sel.has(id)){{sel.delete(id)}}else{{sel.add(id)}}
+            render();
+            renderStats();
+        }}
+    }});
+    
+    document.getElementById('clearBtn').addEventListener('click',function(){{
+        sel.clear();
+        render();
+        renderStats();
+    }});
+}}
+
+function renderStats(){{
+    var s=D.summary;
+    var total=s.total_messages,sent=s.total_sent,recv=s.total_received,numContacts=s.total_contacts;
+    var label='Total';
+    
+    if(sel.size>0){{
+        total=0;sent=0;recv=0;
+        D.contacts.forEach(function(c){{
+            if(sel.has(c.id)){{
+                total+=c.total;
+                sent+=c.sent;
+                recv+=c.received;
+            }}
+        }});
+        numContacts=sel.size;
+        label='Selected';
+    }}
+    
+    var pd=Math.round(total/365);
+    document.getElementById('stats').innerHTML='<div class="stat"><div class="stat-label">'+label+'</div><div class="stat-val gr">'+total.toLocaleString()+'</div><div class="stat-sub">'+pd+'/day</div></div><div class="stat"><div class="stat-label">Sent</div><div class="stat-val" style="color:#0a84ff">'+sent.toLocaleString()+'</div></div><div class="stat"><div class="stat-label">Received</div><div class="stat-val" style="color:#64d2ff">'+recv.toLocaleString()+'</div></div><div class="stat"><div class="stat-label">Contacts</div><div class="stat-val" style="color:#bf5af2">'+numContacts+'</div><div class="stat-sub">'+(sel.size>0?'selected':'+ '+s.total_groups+' groups')+'</div></div>';
 }}
 
 function render(){{
-let c=D.contacts;
-if(plat!=='all')c=c.filter(x=>x.platform===plat);
-if(q)c=c.filter(x=>x.name.toLowerCase().includes(q.toLowerCase()));
-c=c.sort((a,b)=>b[srt]-a[srt]);
-const mx=c[0]?.total||1;
-document.getElementById('cHead').textContent='Contacts ('+c.length+')';
-document.getElementById('cList').innerHTML=c.map((x,i)=>'<div class="contact'+(sel.has(x.id)?' sel':'')+'" data-id="'+x.id+'"><input type="checkbox" class="chk"'+(sel.has(x.id)?' checked':'')+'><span class="rank">#'+(i+1)+'</span><div class="c-info"><div class="c-name">'+esc(x.name)+(x.platform==='imessage'?' 📱':' 💬')+'</div><div class="c-meta"><span>↑'+x.sent.toLocaleString()+'</span><span>↓'+x.received.toLocaleString()+'</span>'+(x.late_night>0?'<span>🌙'+x.late_night+'</span>':'')+'</div><div class="c-bar"><div class="c-fill" style="width:'+(x.total/mx*100).toFixed(1)+'%"></div></div></div><span class="c-count">'+x.total.toLocaleString()+'</span></div>').join('');
-const si=document.getElementById('selInfo'),sc=document.getElementById('selCount');
-if(sel.size){{si.style.display='flex';sc.textContent=sel.size+' selected'}}else{{si.style.display='none'}}
+    var contacts=[].concat(D.contacts);
+    
+    if(plat!=='all'){{
+        contacts=contacts.filter(function(x){{return x.platform===plat}});
+    }}
+    
+    if(searchTerm){{
+        contacts=contacts.filter(function(x){{return x.name.toLowerCase().indexOf(searchTerm)!==-1}});
+    }}
+    
+    contacts.sort(function(a,b){{return b[srt]-a[srt]}});
+    
+    var mx=contacts.length>0?contacts[0].total:1;
+    document.getElementById('cHead').textContent='Contacts ('+contacts.length+')';
+    
+    var html='';
+    for(var i=0;i<contacts.length;i++){{
+        var x=contacts[i];
+        var isSelected=sel.has(x.id);
+        var icon=x.platform==='imessage'?' 📱':' 💬';
+        var barW=(x.total/mx*100).toFixed(1);
+        html+='<div class="contact'+(isSelected?' sel':'')+'" data-id="'+x.id+'">';
+        html+='<input type="checkbox" class="chk"'+(isSelected?' checked':'')+'>';
+        html+='<span class="rank">#'+(i+1)+'</span>';
+        html+='<div class="c-info">';
+        html+='<div class="c-name">'+esc(x.name)+icon+'</div>';
+        html+='<div class="c-meta"><span>↑'+x.sent.toLocaleString()+'</span><span>↓'+x.received.toLocaleString()+'</span>'+(x.late_night>0?'<span>🌙'+x.late_night+'</span>':'')+'</div>';
+        html+='<div class="c-bar"><div class="c-fill" style="width:'+barW+'%"></div></div>';
+        html+='</div>';
+        html+='<span class="c-count">'+x.total.toLocaleString()+'</span>';
+        html+='</div>';
+    }}
+    document.getElementById('cList').innerHTML=html;
+    
+    var si=document.getElementById('selInfo');
+    if(sel.size>0){{
+        si.style.display='flex';
+        document.getElementById('selCount').textContent=sel.size+' selected';
+    }}else{{
+        si.style.display='none';
+    }}
 }}
 
 function charts(){{
-const dates=Object.keys(D.daily_counts).sort(),vals=dates.map(d=>D.daily_counts[d].total);
-new Chart(document.getElementById('actChart'),{{type:'line',data:{{labels:dates.map(d=>new Date(d).toLocaleDateString('en-US',{{month:'short',day:'numeric'}})),datasets:[{{data:vals,borderColor:'#32d74b',backgroundColor:'rgba(50,215,75,.1)',fill:true,tension:.4,pointRadius:0}}]}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}}});
-const hrs=[...Array(24)].map((_,i)=>i),hrVals=hrs.map(h=>D.hourly_counts[String(h)]||0),hrLbls=hrs.map(h=>h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p');
-new Chart(document.getElementById('hrChart'),{{type:'bar',data:{{labels:hrLbls,datasets:[{{data:hrVals,backgroundColor:'#0a84ff',borderRadius:3}}]}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}}});
-const dys=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],dyFull=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],dyVals=dyFull.map(d=>D.day_of_week_counts[d]||0);
-new Chart(document.getElementById('dayChart'),{{type:'bar',data:{{labels:dys,datasets:[{{data:dyVals,backgroundColor:'#bf5af2',borderRadius:3}}]}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366'}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}}});
+    var dates=Object.keys(D.daily_counts).sort();
+    var vals=dates.map(function(d){{return D.daily_counts[d].total}});
+    var labels=dates.map(function(d){{return new Date(d).toLocaleDateString('en-US',{{month:'short',day:'numeric'}})}});
+    
+    new Chart(document.getElementById('actChart'),{{
+        type:'line',
+        data:{{labels:labels,datasets:[{{data:vals,borderColor:'#32d74b',backgroundColor:'rgba(50,215,75,.1)',fill:true,tension:.4,pointRadius:0}}]}},
+        options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
+    }});
+    
+    var hrs=[];for(var i=0;i<24;i++)hrs.push(i);
+    var hrVals=hrs.map(function(h){{return D.hourly_counts[String(h)]||0}});
+    var hrLbls=hrs.map(function(h){{return h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p'}});
+    
+    new Chart(document.getElementById('hrChart'),{{
+        type:'bar',
+        data:{{labels:hrLbls,datasets:[{{data:hrVals,backgroundColor:'#0a84ff',borderRadius:3}}]}},
+        options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366',maxTicksLimit:8}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
+    }});
+    
+    var dys=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var dyFull=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var dyVals=dyFull.map(function(d){{return D.day_of_week_counts[d]||0}});
+    
+    new Chart(document.getElementById('dayChart'),{{
+        type:'bar',
+        data:{{labels:dys,datasets:[{{data:dyVals,backgroundColor:'#bf5af2',borderRadius:3}}]}},
+        options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{color:'#636366'}}}},y:{{grid:{{color:'#2c2c2e'}},ticks:{{color:'#636366'}}}}}}}}
+    }});
 }}
 
 function groups(){{
-if(!D.group_chats.length)return;
-document.getElementById('groupsCard').style.display='block';
-document.getElementById('groupsHead').textContent='Groups ('+D.group_chats.length+')';
-document.getElementById('groupsList').innerHTML=D.group_chats.slice(0,12).map((g,i)=>'<div class="contact"><span class="rank">#'+(i+1)+'</span><div class="c-info"><div class="c-name">'+esc(g.name)+(g.platform==='imessage'?' 📱':' 💬')+'</div><div class="c-meta"><span>You: '+g.sent.toLocaleString()+'</span></div></div><span class="c-count">'+g.total.toLocaleString()+'</span></div>').join('');
+    if(!D.group_chats.length)return;
+    document.getElementById('groupsCard').style.display='block';
+    document.getElementById('groupsHead').textContent='Groups ('+D.group_chats.length+')';
+    var html='';
+    var list=D.group_chats.slice(0,12);
+    for(var i=0;i<list.length;i++){{
+        var g=list[i];
+        var icon=g.platform==='imessage'?' 📱':' 💬';
+        html+='<div class="contact"><span class="rank">#'+(i+1)+'</span><div class="c-info"><div class="c-name">'+esc(g.name)+icon+'</div><div class="c-meta"><span>You: '+g.sent.toLocaleString()+'</span></div></div><span class="c-count">'+g.total.toLocaleString()+'</span></div>';
+    }}
+    document.getElementById('groupsList').innerHTML=html;
 }}
 
-function esc(s){{const d=document.createElement('div');d.textContent=s;return d.innerHTML}}
+function esc(s){{var d=document.createElement('div');d.textContent=s;return d.innerHTML}}
+
 init();
 </script>
 </body></html>'''
